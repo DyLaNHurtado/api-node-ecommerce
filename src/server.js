@@ -2,10 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
-const { errorHandler } = require('./src/middlewares/errorHandler');
-const envConfig = require('./config/envConfig');
-const setupDatabase = require('./scripts/setupDatabase');
-const routes = require('./routes');
+const { errorHandler } = require('./middlewares/errorHandler');
+const envConfig = require('../config/envConfig');
+const setupDatabase = require('../scripts/setupDatabase');
+const routes = require('./routes/routes');
 
 const app = express();
 const PORT = envConfig.server.port;

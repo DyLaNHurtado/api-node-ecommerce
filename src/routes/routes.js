@@ -1,10 +1,12 @@
 const express = require('express');
+const authMiddleware = require('../middlewares/authMiddleware');
+const errorHandler = require('../middlewares/errorHandler');
 const orderRouter = require('./orderRoutes');
 const productRoutes = require('./productRoutes');
 const userRoutes = require('./userRoutes');
 
 const router = express.Router();
-
+router.use(authMiddleware);
 // Ruta principal
 router.get('/', (req, res) => {
   res.send('Ruta principal de la aplicación');
@@ -14,5 +16,6 @@ router.get('/', (req, res) => {
 router.use('/orders', orderRouter);
 router.use('/product', productRoutes);
 router.use('/user', userRoutes);
+router.use(errorHandler);
 
 module.exports = router;
