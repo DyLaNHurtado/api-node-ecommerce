@@ -5,11 +5,9 @@ const orderModel = require('../src/models/orderModel');
 
 const setupDatabase = () => {
   // Conexión a la base de datos
-  mongoose.connect('mongodb://localhost:27017/tu_basededatos', {
+  mongoose.connect('mongodb+srv://dylanhurtado43:DyLaNHurtado@cluster0.jjhdnl3.mongodb.net/?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true
   });
 
   // Asocia los modelos a la conexión de la base de datos

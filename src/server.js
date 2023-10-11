@@ -2,7 +2,6 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
-const { errorHandler } = require('./middlewares/errorHandler');
 const envConfig = require('../config/envConfig');
 const setupDatabase = require('../scripts/setupDatabase');
 const routes = require('./routes/routes');
@@ -21,9 +20,6 @@ setupDatabase();
 
 // API routes
 app.use('/api', routes);
-
-// Error handler middleware
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
