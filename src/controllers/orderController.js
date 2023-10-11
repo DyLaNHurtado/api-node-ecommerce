@@ -1,81 +1,141 @@
 const Order = require('../models/orderModel');
-
-const createOrder = async (req, res) => {
-  const { products, totalPrice } = req.body;
-  const { _id: userId } = req.user; // ID del usuario obtenido desde la autenticación
-
-  try {
-    const order = new Order({
-      products,
-      totalPrice,
-      user: userId,
-    });
-    const savedOrder = await order.save();
-    res.json(savedOrder);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al crear el pedido' });
-  }
-};
+const CustomError = require('../utilities/customError');
+const { handleError, handleValidationError } = require('../middlewares/errorHandler');
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('products.product').populate('user');
+    const orders = await Order.find();
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los pedidos' });
+    handleError(error, res);
   }
 };
 
 const getOrderById = async (req, res) => {
+  const orderId = req.params.orderId;
+
   try {
-    const order = await Order.findById(req.params.orderId).populate('products.product').populate('user');
+    const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+      throw new CustomError(404, 'Orden no encontrada.');
     }
+
     res.json(order);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el pedido' });
+    handleError(error, res);
+  }
+};
+
+const createOrder = async (req, res) => {
+  const { products, totalPrice, user } = req.body;
+
+  try {
+    const order = new Order({ products, totalPrice, user });
+    await order.save();
+
+    res.json({ message: 'Orden creada exitosamente.' });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      handleValidationError(error, res);
+    } else {
+      handleError(error, res);
+    }
   }
 };
 
 const updateOrder = async (req, res) => {
-  const { products, totalPrice } = req.body;
+  const orderId = req.params.orderId;
+  const { products, totalPrice, user } = req.body;
 
   try {
     const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.orderId,
-      { products, totalPrice },
+      orderId,
+      { products, totalPrice, user },
       { new: true }
-    ).populate('products.product').populate('user');
+    );
 
     if (!updatedOrder) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+      throw new CustomError(404, 'Orden no encontrada.');
     }
 
-    res.json(updatedOrder);
+    res.json({ message: 'Orden actualizada exitosamente.', updatedOrder });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el pedido' });
+    if (error.name === 'ValidationError') {
+      handleValidationError(error, res);
+    } else {
+      handleError(error, res);
+    }
   }
 };
 
 const deleteOrder = async (req, res) => {
+  const orderId = req.params.orderId;
+
   try {
-    const deletedOrder = await Order.findByIdAndDelete(req.params.orderId);
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
 
     if (!deletedOrder) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+      throw new CustomError(404, 'Orden no encontrada.');
     }
 
-    res.json(deletedOrder);
+    res.json({ message: 'Orden eliminada exitosamente.', deletedOrder });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el pedido' });
+    handleError(error, res);
   }
 };
 
+const getOrdersByUser = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const orders = await Order.find({ user: userId });
+    res.json(orders);
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+const markOrderAsCompleted = async (req, res) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { completed: true },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      throw new CustomError(404, 'Orden no encontrada.');
+    }
+
+    res.json({ message: 'Orden marcada como completada.', updatedOrder });
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+const getOrdersByDateRange = async (req, res) => {
+  const { startDate, endDate } = req.params;
+
+  try {
+    const orders = await Order.find({
+      createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
+    });
+    res.json(orders);
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+
 module.exports = {
-  createOrder,
   getAllOrders,
   getOrderById,
+  createOrder,
   updateOrder,
   deleteOrder,
+  getOrdersByUser,
+  markOrderAsCompleted,
+  getOrdersByDateRange
 };

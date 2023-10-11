@@ -1,6 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/authMiddleware');
-const errorHandler = require('../middlewares/errorHandler');
+const { handleError } = require('../middlewares/errorHandler');
 const orderRouter = require('./orderRoutes');
 const productRoutes = require('./productRoutes');
 const userRoutes = require('./userRoutes');
@@ -16,6 +16,6 @@ router.get('/', (req, res) => {
 router.use('/orders', orderRouter);
 router.use('/product', productRoutes);
 router.use('/user', userRoutes);
-router.use(errorHandler);
+router.use(handleError);
 
 module.exports = router;

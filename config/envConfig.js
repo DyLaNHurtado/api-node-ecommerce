@@ -10,10 +10,13 @@ const envConfig = {
   server: {
     port: process.env.PORT || 3000,
   },
-
+  api: {
+    uri: `/api/v1/`
+  },
   // Configuración para JWT
   jwt: {
     secretKey: process.env.JWT_SECRET || 'mySecretKey',
+    time: '1h'
   },
 };
 

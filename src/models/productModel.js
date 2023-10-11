@@ -17,13 +17,16 @@ const productSchema = new mongoose.Schema({
   },
   size: {
     type: String,
-    enum: ['S', 'M', 'L', 'XL'], // Tallas posibles para camisetas
+    enum: ['S', 'M', 'L', 'XL'],
   },
   color: {
     type: String,
     trim: true,
   },
-  // Otros atributos relevantes para la venta de camisetas
+  category: {
+    type: String,
+    required: true,
+  },
 });
 
 const Product = mongoose.model('Product', productSchema);

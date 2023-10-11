@@ -1,69 +1,139 @@
 const Product = require('../models/productModel');
+const CustomError = require('../utilities/customError');
+const { handleValidationError, handleError } = require('../middlewares/errorHandler');
 
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener productos' });
+    handleError(error, res);
   }
 };
 
 const getProductById = async (req, res) => {
+  const productId = req.params.productId;
+
   try {
-    const product = await Product.findById(req.params.productId);
+    const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ error: 'Producto no encontrado' });
+      throw new CustomError(404, 'Producto no encontrado.');
     }
+
     res.json(product);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el producto' });
+    handleError(error, res);
   }
 };
 
 const createProduct = async (req, res) => {
-  const { name, price, description } = req.body;
+  const { name, price, description, size, color } = req.body;
+
   try {
-    const product = new Product({
-      name,
-      price,
-      description,
-    });
-    const savedProduct = await product.save();
-    res.json(savedProduct);
+    const product = new Product({ name, price, description, size, color });
+    await product.save();
+
+    res.json({ message: 'Producto creado exitosamente.' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear el producto' });
+    if (error.name === 'ValidationError') {
+      handleValidationError(error, res);
+    } else {
+      handleError(error, res);
+    }
   }
 };
 
 const updateProduct = async (req, res) => {
-  const { name, price, description } = req.body;
+  const productId = req.params.productId;
+  const { name, price, description, size, color } = req.body;
+
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.productId,
-      { name, price, description },
+      productId,
+      { name, price, description, size, color },
       { new: true }
     );
+
     if (!updatedProduct) {
-      return res.status(404).json({ error: 'Producto no encontrado' });
+      throw new CustomError(404, 'Producto no encontrado.');
     }
-    res.json(updatedProduct);
+
+    res.json({ message: 'Producto actualizado exitosamente.', updatedProduct });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el producto' });
+    if (error.name === 'ValidationError') {
+      handleValidationError(error, res);
+    } else {
+      handleError(error, res);
+    }
   }
 };
 
 const deleteProduct = async (req, res) => {
+  const productId = req.params.productId;
+
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.productId);
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
     if (!deletedProduct) {
-      return res.status(404).json({ error: 'Producto no encontrado' });
+      throw new CustomError(404, 'Producto no encontrado.');
     }
-    res.json(deletedProduct);
+
+    res.json({ message: 'Producto eliminado exitosamente.', deletedProduct });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el producto' });
+    handleError(error, res);
   }
 };
+
+const getProductsByCategory = async (req, res) => {
+  const category = req.params.category;
+
+  try {
+    const products = await Product.find({ category });
+    res.json(products);
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+const searchProducts = async (req, res) => {
+  const searchTerm = req.params.searchTerm;
+
+  try {
+    const products = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
+    res.json(products);
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+// const getProductsOnSale = async (req, res) => {
+//   try {
+//     const products = await Product.find({ onSale: true });
+//     res.json(products);
+//   } catch (error) {
+//     handleError(error, res);
+//   }
+// };
+
+// const sortProductsByPrice = async (req, res) => {
+//   const sortOrder = req.query.order || 'asc';
+
+//   try {
+//     const products = await Product.find().sort({ price: sortOrder });
+//     res.json(products);
+//   } catch (error) {
+//     handleError(error, res);
+//   }
+// };
+
+// const getFeaturedProducts = async (req, res) => {
+//   try {
+//     const products = await Product.find({ featured: true });
+//     res.json(products);
+//   } catch (error) {
+//     handleError(error, res);
+//   }
+// };
 
 module.exports = {
   getAllProducts,
@@ -71,4 +141,6 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
+  searchProducts
 };
