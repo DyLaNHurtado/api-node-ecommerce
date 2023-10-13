@@ -1,6 +1,5 @@
 const Order = require('../models/orderModel');
-const CustomError = require('../utilities/customError');
-const { handleError, handleValidationError } = require('../middlewares/errorHandler');
+const { handleError, CustomError, handleValidationError } = require('../middlewares/errorHandler');
 
 const getAllOrders = async (req, res) => {
   try {

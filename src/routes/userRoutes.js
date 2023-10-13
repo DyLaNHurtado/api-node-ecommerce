@@ -4,6 +4,7 @@ const {
   getUserById,
   createUser,
   login,
+  register,
   updateUser,
   deleteUser,
   getAuthenticatedUserDetails,

@@ -1,8 +1,7 @@
 const bcrypt = require('bcrypt');
 const envConfig = require('../../config/envConfig')
 const User = require('../models/userModel');
-const CustomError = require('../utilities/customError');
-const { handleValidationError, handleError } = require('../middlewares/errorHandler');
+const { handleError, CustomError, handleValidationError } = require('../middlewares/errorHandler');
 
 const getUsers = async (req, res) => {
   try {
@@ -280,6 +279,7 @@ module.exports = {
   getUserById,
   createUser,
   login,
+  register,
   updateUser,
   deleteUser,
   getAuthenticatedUserDetails,
